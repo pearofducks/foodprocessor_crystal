@@ -27,4 +27,4 @@ def test_expand_amount():
     assert foodProcessor.expand_amount('2 c') == '2 cups'
     assert foodProcessor.expand_amount('0.5 t') == '0.5 teaspoon'
     assert foodProcessor.expand_amount('2 pinches') == '2 pinches'
-    assert foodProcessor.expand_amount('!') == ''
+    assert foodProcessor.expand_amount('!') == None

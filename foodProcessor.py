@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 import yaml
+import markdown
 from jinja2 import Template
 from jinja2 import Environment, FileSystemLoader
 
@@ -21,28 +22,41 @@ def transform(item):
             process_ingredient(v)
 
 # takes a tuple
-def process_ingredient(i):
-    expand_amount(b[1])
+def process_ingredient(p):
+    amount = expand_amount(p[1])
+    if amount is not None:
+        expand_ingredient(p[0])
+        # return the flipped join of the two
+    else:
+        pass
+        # just return p[0]
     # flip
     # bold ingredient name
-    # expand letter
     # handle dashes (to italics)
+
+def expand_ingredient(i):
+    ii = i.split('-')
+    if len(ii) == 2:
+        return "**{main}** *{adj}*".format(main=ii[0], adj=ii[1])
+    else:
+        return "**{main}**".format(main=i)
+
 
 def expand_amount(a):
     if a == '!':
-        return ''
+        return None
     number, measure = a.split(' ', 1)
-    resulting_measure = expand_measure(measure)
     try:
         number = int(number)
     except ValueError:
         number = float(number)
-    if resulting_measure is None:
+    expansion = expand_measure(measure)
+    if expansion is None:
         measure = measure
     elif number > 1:
-        measure = resulting_measure + 's'
+        measure = expansion + 's'
     else:
-        measure = resulting_measure
+        measure = expansion
     return "{n} {m}".format(n=number,m=measure)
 
 def expand_measure(m):
