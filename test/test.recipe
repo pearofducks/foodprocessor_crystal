@@ -16,6 +16,10 @@ what:
     cinnamon: 0.5 t
     salt: 1 dash
     lemon juice: 2 t
+  third:
+    - foo: 1 c
+    - bar: 2 b
+    - lel: 3 d
 how:
   - "Preheat oven to 425°F / 220°C"
   - "**For the filling:** mix ingredients together just before filling pie crust, dot top of apple mixture with 2 tablespoons of cold butter cubed."

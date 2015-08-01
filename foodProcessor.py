@@ -16,26 +16,39 @@ def read_recipe(path):
     except Exception,e:
         print "{error} when loading recipe {name}".format(error=e,name=path)
 
-def transform(item):
-    for v in item.values():
-        if type(v) == type('str'):
-            process_ingredient(v)
+def process_dict(d):
+    for k,v in d.values():
+        if (type(k) == type('str')
+        and type(v) == type('str')):
+            process_ingredient_batch(d)
+
+# k,v
+# str,dict -> new hash
+# str,str -> normal item
+
+# this will receive a hash of ingredients to be made into a UL
+def process_ingredient_batch(d):
+    ul = []
+    for i in d:
+        ul.append(process_ingredient(i))
+    return ul
+
 
 # takes a tuple
 def process_ingredient(p):
     amount = expand_amount(p[1])
     if amount is not None:
-        expand_ingredient(p[0])
-        # return the flipped join of the two
+        return "- {amt} {ing}".format(
+            amt=amount,
+            ing=expand_ingredient(p[0])
+            )
     else:
-        pass
-        # just return p[0]
-    # flip
-    # bold ingredient name
-    # handle dashes (to italics)
+        return "- {ing}".format(
+            ing=p[0]
+            )
 
 def expand_ingredient(i):
-    ii = i.split('-')
+    ii = [x.strip() for x in i.split('-',1)]
     if len(ii) == 2:
         return "**{main}** *{adj}*".format(main=ii[0], adj=ii[1])
     else:
@@ -43,6 +56,7 @@ def expand_ingredient(i):
 
 
 def expand_amount(a):
+    a = a.strip()
     if a == '!':
         return None
     number, measure = a.split(' ', 1)
