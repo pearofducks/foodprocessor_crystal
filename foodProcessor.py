@@ -33,27 +33,22 @@ def process_dict(d):
         process_dict(d)
 
 # this will receive a hash of ingredients to be made into a UL
-def process_ingredient_batch(d):
+def process_ingredients(d):
     ul = []
-    for i in d.items():
-        ul.append(process_ingredient(i))
+    for k,v in d.items():
+        amount = expand_ingredient_amount(v)
+        if amount is not None:
+            ul.append("- {amt} {ing}".format(
+                amt=amount,
+                ing=expand_ingredient_name(k)
+                ))
+        else:
+            ul.append("- {ing}".format(
+                ing=k
+                ))
     return ul
 
-
-# takes a tuple
-def process_ingredient(p):
-    amount = expand_amount(p[1])
-    if amount is not None:
-        return "- {amt} {ing}".format(
-            amt=amount,
-            ing=expand_ingredient(p[0])
-            )
-    else:
-        return "- {ing}".format(
-            ing=p[0]
-            )
-
-def expand_ingredient(i):
+def expand_ingredient_name(i):
     ii = [x.strip() for x in i.split('-',1)]
     if len(ii) == 2:
         return "**{main}** *{adj}*".format(main=ii[0], adj=ii[1])
@@ -61,7 +56,7 @@ def expand_ingredient(i):
         return "**{main}**".format(main=i)
 
 
-def expand_amount(a):
+def expand_ingredient_amount(a):
     a = a.strip()
     if a == '!':
         return None
@@ -70,7 +65,7 @@ def expand_amount(a):
         number = int(number)
     except ValueError:
         number = float(number)
-    expansion = expand_measure(measure)
+    expansion = expand_amount_measure(measure)
     if expansion is None:
         measure = measure
     elif number > 1:
@@ -79,7 +74,7 @@ def expand_amount(a):
         measure = expansion
     return "{n} {m}".format(n=number,m=measure)
 
-def expand_measure(m):
+def expand_amount_measure(m):
     return {
             'c': 'cup',
             't': 'teaspoon',
