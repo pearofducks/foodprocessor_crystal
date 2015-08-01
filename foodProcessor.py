@@ -9,27 +9,33 @@ from jinja2 import Environment, FileSystemLoader
 src = ""
 dst = ""
 
-def read_recipe(path):
+def import_recipe(path):
+    return parse_yaml(read_file(path))
+
+def read_file(path):
     try:
         with open(path) as f:
             return f.read()
     except Exception,e:
         print "{error} when loading recipe {name}".format(error=e,name=path)
 
-def process_dict(d):
-    for k,v in d.values():
-        if (type(k) == type('str')
-        and type(v) == type('str')):
-            process_ingredient_batch(d)
+def parse_yaml(text):
+    try:
+        return yaml.load(text)
+    except Exception,e:
+        print "{error} when parsing YAML".format(error=e)
 
-# k,v
-# str,dict -> new hash
-# str,str -> normal item
+def process_dict(d):
+    i = d.items()[0]
+    if type(i) == type('str'):
+        process_ingredient_batch(d)
+    elif type(i) == type('dict'):
+        process_dict(d)
 
 # this will receive a hash of ingredients to be made into a UL
 def process_ingredient_batch(d):
     ul = []
-    for i in d:
+    for i in d.items():
         ul.append(process_ingredient(i))
     return ul
 
@@ -82,9 +88,6 @@ def expand_measure(m):
             'g': 'gram',
             'p': ''
             }.get(m,None)
-
-def parse_yaml(text):
-    return yaml.load(text)
 
 def handle_args():
     parser = argparse.ArgumentParser(description='process a folder of recipes into a static site')

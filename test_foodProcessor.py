@@ -5,8 +5,7 @@ import pytest
 import foodProcessor as fp
 
 def test_read_basic_recipe():
-    text = fp.read_recipe('test/simple.recipe')
-    yaml = fp.parse_yaml(text)
+    yaml = fp.import_recipe('test/simple.recipe')
     assert yaml['name'] == 'apple pie'
     assert yaml['what'] == { 'flour': '2 c' }
     assert yaml['how']  == [ 'Preheat oven to 425°F / 220°C' ]
@@ -38,3 +37,8 @@ def test_process_ingredient():
     assert fp.process_ingredient('flour: 2 c'.split(':')) == '- 2 cups **flour**'
     assert fp.process_ingredient('sugar: !'.split(':')) == '- sugar'
     assert fp.process_ingredient('berries - halved: 1 g'.split(':')) == '- 1 gram **berries** *halved*'
+
+def test_process_ingredient_batch():
+    test_data = {'flour - sifted': '2 c', 'sugar': '100 g'}
+    result_data = ['- 2 cups **flour** *sifted*', '- 100 grams **sugar**']
+    assert fp.process_ingredient_batch(test_data) == result_data
