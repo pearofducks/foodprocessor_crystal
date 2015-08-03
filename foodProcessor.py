@@ -61,11 +61,11 @@ class Recipe(object):
     def process_ingredient_batch(self,d):
         ul = []
         for k,v in d.items():
-            amount = expand_ingredient_amount(v)
+            amount = self.expand_ingredient_amount(v)
             if amount is not None:
                 ul.append("- {amt} {ing}".format(
                     amt=amount,
-                    ing=expand_ingredient_name(k)
+                    ing=self.expand_ingredient_name(k)
                     ))
             else:
                 ul.append("- {ing}".format(
@@ -90,7 +90,7 @@ class Recipe(object):
             number = int(number)
         except ValueError:
             number = float(number)
-        expansion = expand_amount_measure(measure)
+        expansion = self.expand_amount_measure(measure)
         if expansion is None:
             measure = measure
         elif number > 1:
