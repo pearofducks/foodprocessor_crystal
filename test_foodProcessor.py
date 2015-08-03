@@ -41,4 +41,4 @@ def test_expand_ingredient_name():
 def test_process_ingredients():
     test_data = {'flour - sifted': '2 c', 'sugar': '100 g'}
     result_data = ['- 2 cups **flour** *sifted*', '- 100 grams **sugar**']
-    assert fp.process_ingredients(test_data) == result_data
+    assert fp.process_ingredient_batch(test_data) == result_data

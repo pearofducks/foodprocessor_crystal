@@ -2,12 +2,17 @@
 
 from __future__ import unicode_literals
 import yaml
+import yamlordereddictloader
 import markdown
 from jinja2 import Template
 from jinja2 import Environment, FileSystemLoader
 
 src = ""
 dst = ""
+
+class Recipe(object):
+    result = []
+
 
 def import_recipe(path):
     return parse_yaml(read_file(path))
@@ -21,7 +26,7 @@ def read_file(path):
 
 def parse_yaml(text):
     try:
-        return yaml.load(text)
+        return yaml.load(text, Loader=yamlordereddictloader.Loader)
     except Exception,e:
         print "{error} when parsing YAML".format(error=e)
 
@@ -33,7 +38,7 @@ def process_dict(d):
         process_dict(d)
 
 # this will receive a hash of ingredients to be made into a UL
-def process_ingredients(d):
+def process_ingredient_batch(d):
     ul = []
     for k,v in d.items():
         amount = expand_ingredient_amount(v)
