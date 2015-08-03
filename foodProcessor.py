@@ -10,25 +10,6 @@ from jinja2 import Environment, FileSystemLoader
 src = ""
 dst = ""
 
-class Recipe(object):
-    result = []
-
-
-def import_recipe(path):
-    return parse_yaml(read_file(path))
-
-def read_file(path):
-    try:
-        with open(path) as f:
-            return f.read()
-    except Exception,e:
-        print "{error} when loading recipe {name}".format(error=e,name=path)
-
-def parse_yaml(text):
-    try:
-        return yaml.load(text, Loader=yamlordereddictloader.Loader)
-    except Exception,e:
-        print "{error} when parsing YAML".format(error=e)
 
 def process_dict(d):
     i = d.items()[0]
@@ -119,3 +100,25 @@ def handle_recipe(recipe_path):
 def main():
     handle_args()
     go()
+
+class Recipe(object):
+
+    def __init__(self,path):
+        self.result = []
+        yaml = import_recipe(path)
+
+    def import_recipe(path):
+        return parse_yaml(read_file(path))
+
+    def read_file(path):
+        try:
+            with open(path) as f:
+                return f.read()
+        except Exception,e:
+            print "{error} when loading recipe {name}".format(error=e,name=path)
+
+    def parse_yaml(text):
+        try:
+            return yaml.load(text, Loader=yamlordereddictloader.Loader)
+        except Exception,e:
+            print "{error} when parsing YAML".format(error=e)
