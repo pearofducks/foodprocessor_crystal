@@ -10,66 +10,6 @@ from jinja2 import Environment, FileSystemLoader
 src = ""
 dst = ""
 
-
-def process_dict(d):
-    i = d.items()[0]
-    if type(i) == type('str'):
-        process_ingredient_batch(d)
-    elif type(i) == type('dict'):
-        process_dict(d)
-
-# this will receive a hash of ingredients to be made into a UL
-def process_ingredient_batch(d):
-    ul = []
-    for k,v in d.items():
-        amount = expand_ingredient_amount(v)
-        if amount is not None:
-            ul.append("- {amt} {ing}".format(
-                amt=amount,
-                ing=expand_ingredient_name(k)
-                ))
-        else:
-            ul.append("- {ing}".format(
-                ing=k
-                ))
-    return ul
-
-def expand_ingredient_name(i):
-    ii = [x.strip() for x in i.split('-',1)]
-    if len(ii) == 2:
-        return "**{main}** *{adj}*".format(main=ii[0], adj=ii[1])
-    else:
-        return "**{main}**".format(main=i)
-
-
-def expand_ingredient_amount(a):
-    a = a.strip()
-    if a == '!':
-        return None
-    number, measure = a.split(' ', 1)
-    try:
-        number = int(number)
-    except ValueError:
-        number = float(number)
-    expansion = expand_amount_measure(measure)
-    if expansion is None:
-        measure = measure
-    elif number > 1:
-        measure = expansion + 's'
-    else:
-        measure = expansion
-    return "{n} {m}".format(n=number,m=measure)
-
-def expand_amount_measure(m):
-    return {
-            'c': 'cup',
-            't': 'teaspoon',
-            'T': 'tablespoon',
-            'ml': 'milliliter',
-            'g': 'gram',
-            'p': ''
-            }.get(m,None)
-
 def handle_args():
     parser = argparse.ArgumentParser(description='process a folder of recipes into a static site')
     parser.add_argument("input", help="the folder of (YAML) recipes to process")
@@ -105,19 +45,81 @@ class Recipe(object):
 
     def __init__(self,path):
         self.result = []
-        yaml = import_recipe(path)
+        self.path = path
 
-    def import_recipe(path):
-        return parse_yaml(read_file(path))
+    def process(self):
+        yaml = load(self.path)
 
-    def read_file(path):
+    def process_dict(self,d):
+        i = d.items()[0]
+        if type(i) == type('str'):
+            process_ingredient_batch(d)
+        elif type(i) == type('dict'):
+            process_dict(d)
+
+    # this will receive a hash of ingredients to be made into a UL
+    def process_ingredient_batch(self,d):
+        ul = []
+        for k,v in d.items():
+            amount = expand_ingredient_amount(v)
+            if amount is not None:
+                ul.append("- {amt} {ing}".format(
+                    amt=amount,
+                    ing=expand_ingredient_name(k)
+                    ))
+            else:
+                ul.append("- {ing}".format(
+                    ing=k
+                    ))
+        return ul
+
+    def expand_ingredient_name(self,i):
+        ii = [x.strip() for x in i.split('-',1)]
+        if len(ii) == 2:
+            return "**{main}** *{adj}*".format(main=ii[0], adj=ii[1])
+        else:
+            return "**{main}**".format(main=i)
+
+
+    def expand_ingredient_amount(self,a):
+        a = a.strip()
+        if a == '!':
+            return None
+        number, measure = a.split(' ', 1)
+        try:
+            number = int(number)
+        except ValueError:
+            number = float(number)
+        expansion = expand_amount_measure(measure)
+        if expansion is None:
+            measure = measure
+        elif number > 1:
+            measure = expansion + 's'
+        else:
+            measure = expansion
+        return "{n} {m}".format(n=number,m=measure)
+
+    def expand_amount_measure(self,m):
+        return {
+                'c': 'cup',
+                't': 'teaspoon',
+                'T': 'tablespoon',
+                'ml': 'milliliter',
+                'g': 'gram',
+                'p': ''
+                }.get(m,None)
+
+    def load(self,path):
+        return self.parse_yaml(self.read_file(path))
+
+    def read_file(self,path):
         try:
             with open(path) as f:
                 return f.read()
         except Exception,e:
             print "{error} when loading recipe {name}".format(error=e,name=path)
 
-    def parse_yaml(text):
+    def parse_yaml(self,text):
         try:
             return yaml.load(text, Loader=yamlordereddictloader.Loader)
         except Exception,e:
