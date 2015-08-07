@@ -65,7 +65,6 @@ class Recipe(object):
         return markdown.markdown(self.markdown())
 
     def print_headers(self,h,k):
-        # self.mkdn.append("<h{h}>{k}</h{h}>".format(h=h,k=k))
         self.mkdn.append("{h}{k}".format(h="#"*h,k=k))
 
     def add_space(self):
@@ -74,7 +73,6 @@ class Recipe(object):
 
     def process_dict(self,d,depth):
         for k,v in d.items():
-            # print "\tk is {kk} and v is {vv}".format(kk=k,vv=v)
             if isinstance(v, str):
                 self.process_ingredient(k,v)
             elif isinstance(v, dict):
@@ -92,7 +90,6 @@ class Recipe(object):
             self.mkdn.append(line)
             self.add_space()
 
-    # this will receive a hash of ingredients to be made into a UL
     def process_ingredient(self,k,v):
         amount = self.ingredient_amount(v)
         if amount is not None:
@@ -118,12 +115,10 @@ class Recipe(object):
         if a == '!':
             return None
         number, measure = a.split(' ', 1)
-
         try:
             number = int(number)
         except ValueError:
             number = float(number)
-
         expansion = self.amount_measure(measure)
         if expansion is None:
             measure = measure
@@ -131,7 +126,6 @@ class Recipe(object):
             measure = expansion + 's'
         else:
             measure = expansion
-
         return "{n} {m}".format(n=number,m=measure)
 
     def amount_measure(self,m):
