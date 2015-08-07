@@ -44,42 +44,50 @@ def main():
 class Recipe(object):
 
     def __init__(self,path):
-        self.result = []
+        self.mkdn = []
         self.path = path
 
     def process(self):
         yaml = self.load()
         self.name = yaml.pop('name')
         self.process_dict(yaml,0)
+        print "markdown"
+        print "\n".join(self.mkdn)
+        print "html"
+        print markdown.markdown("\n".join(self.mkdn))
+
+    def print_headers(self,h,k):
+        self.mkdn.append("<h{h}>{k}</h{h}>".format(h=h,k=k))
 
     def process_dict(self,d,depth):
         for k,v in d.items():
             # print "\tk is {kk} and v is {vv}".format(kk=k,vv=v)
             if isinstance(v, str):
-                ul = self.process_ingredient_batch(d)
-                print markdown.markdown("\n".join(ul))
-                break
+                self.process_ingredient(k,v)
             elif isinstance(v, dict):
-                print "<h{h}>{k}</h{h}>".format(h=depth+1,k=k)
+                self.print_headers(depth+1,k)
                 self.process_dict(v,depth+1)
+            elif isinstance(v, list):
+                self.print_headers(depth+1,k)
+                self.process_list(v)
+
+    def process_list(self,l):
+        self.mkdn.append("\n".join(l))
 
     # this will receive a hash of ingredients to be made into a UL
-    def process_ingredient_batch(self,d):
-        ul = []
-        for k,v in d.items():
-            amount = self.expand_ingredient_amount(v)
-            if amount is not None:
-                ul.append("- {amt} {ing}".format(
-                    amt=amount,
-                    ing=self.expand_ingredient_name(k)
-                    ))
-            else:
-                ul.append("- {ing}".format(
-                    ing=k
-                    ))
-        return ul
+    def process_ingredient(self,k,v):
+        amount = self.ingredient_amount(v)
+        if amount is not None:
+            self.mkdn.append("- {amt} {ing}".format(
+                amt=amount,
+                ing=self.ingredient_name(k)
+                ))
+        else:
+            self.mkdn.append("- {ing}".format(
+                ing=k
+                ))
 
-    def expand_ingredient_name(self,i):
+    def ingredient_name(self,i):
         ii = [x.strip() for x in i.split('-',1)]
         if len(ii) == 2:
             return "**{main}** *{adj}*".format(main=ii[0], adj=ii[1])
@@ -87,7 +95,7 @@ class Recipe(object):
             return "**{main}**".format(main=i)
 
 
-    def expand_ingredient_amount(self,a):
+    def ingredient_amount(self,a):
         a = a.strip()
         if a == '!':
             return None
@@ -98,7 +106,7 @@ class Recipe(object):
         except ValueError:
             number = float(number)
 
-        expansion = self.expand_amount_measure(measure)
+        expansion = self.amount_measure(measure)
         if expansion is None:
             measure = measure
         elif number > 1:
@@ -108,7 +116,7 @@ class Recipe(object):
 
         return "{n} {m}".format(n=number,m=measure)
 
-    def expand_amount_measure(self,m):
+    def amount_measure(self,m):
         return {
                 'c': 'cup',
                 't': 'teaspoon',
