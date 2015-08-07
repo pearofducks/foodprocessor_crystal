@@ -51,13 +51,26 @@ class Recipe(object):
         yaml = self.load()
         self.name = yaml.pop('name')
         self.process_dict(yaml,0)
+        print
         print "markdown"
-        print "\n".join(self.mkdn)
+        print self.markdown()
+        print
         print "html"
-        print markdown.markdown("\n".join(self.mkdn))
+        print self.html()
+
+    def markdown(self):
+        return "\n".join(self.mkdn)
+
+    def html(self):
+        return markdown.markdown(self.markdown())
 
     def print_headers(self,h,k):
-        self.mkdn.append("<h{h}>{k}</h{h}>".format(h=h,k=k))
+        # self.mkdn.append("<h{h}>{k}</h{h}>".format(h=h,k=k))
+        self.mkdn.append("{h}{k}".format(h="#"*h,k=k))
+
+    def add_space(self):
+        if not self.mkdn[-1] == "":
+            self.mkdn.append("")
 
     def process_dict(self,d,depth):
         for k,v in d.items():
@@ -66,13 +79,18 @@ class Recipe(object):
                 self.process_ingredient(k,v)
             elif isinstance(v, dict):
                 self.print_headers(depth+1,k)
+                self.add_space()
                 self.process_dict(v,depth+1)
+                self.add_space()
             elif isinstance(v, list):
                 self.print_headers(depth+1,k)
+                self.add_space()
                 self.process_list(v)
 
     def process_list(self,l):
-        self.mkdn.append("\n".join(l))
+        for line in l:
+            self.mkdn.append(line)
+            self.add_space()
 
     # this will receive a hash of ingredients to be made into a UL
     def process_ingredient(self,k,v):
@@ -90,7 +108,7 @@ class Recipe(object):
     def ingredient_name(self,i):
         ii = [x.strip() for x in i.split('-',1)]
         if len(ii) == 2:
-            return "**{main}** *{adj}*".format(main=ii[0], adj=ii[1])
+            return "**{main}** _{adj}_".format(main=ii[0], adj=ii[1])
         else:
             return "**{main}**".format(main=i)
 
