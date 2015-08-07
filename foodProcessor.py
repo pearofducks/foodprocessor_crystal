@@ -54,12 +54,13 @@ class Recipe(object):
 
     def process_dict(self,d,depth):
         for k,v in d.items():
-            print "k is {kk} and v is {vv}".format(kk=k,vv=v)
+            # print "\tk is {kk} and v is {vv}".format(kk=k,vv=v)
             if isinstance(v, str):
-                print "\tPROC INGRE FOR {} AT DEPTH {}".format(k,depth)
-                self.process_ingredient_batch(d)
+                ul = self.process_ingredient_batch(d)
+                print markdown.markdown("\n".join(ul))
+                break
             elif isinstance(v, dict):
-                print "\tPROC DICT FOR {} AT DEPTH {}".format(k,depth)
+                print "<h{h}>{k}</h{h}>".format(h=depth+1,k=k)
                 self.process_dict(v,depth+1)
 
     # this will receive a hash of ingredients to be made into a UL
@@ -76,8 +77,7 @@ class Recipe(object):
                 ul.append("- {ing}".format(
                     ing=k
                     ))
-        print ul
-        # return ul
+        return ul
 
     def expand_ingredient_name(self,i):
         ii = [x.strip() for x in i.split('-',1)]
