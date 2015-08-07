@@ -48,14 +48,19 @@ class Recipe(object):
         self.path = path
 
     def process(self):
-        yaml = load(self.path)
+        yaml = self.load()
+        self.name = yaml.pop('name')
+        self.process_dict(yaml,0)
 
-    def process_dict(self,d):
-        i = d.items()[0]
-        if type(i) == type('str'):
-            process_ingredient_batch(d)
-        elif type(i) == type('dict'):
-            process_dict(d)
+    def process_dict(self,d,depth):
+        for k,v in d.items():
+            print "k is {kk} and v is {vv}".format(kk=k,vv=v)
+            if isinstance(v, str):
+                print "\tPROC INGRE FOR {} AT DEPTH {}".format(k,depth)
+                self.process_ingredient_batch(d)
+            elif isinstance(v, dict):
+                print "\tPROC DICT FOR {} AT DEPTH {}".format(k,depth)
+                self.process_dict(v,depth+1)
 
     # this will receive a hash of ingredients to be made into a UL
     def process_ingredient_batch(self,d):
@@ -71,7 +76,8 @@ class Recipe(object):
                 ul.append("- {ing}".format(
                     ing=k
                     ))
-        return ul
+        print ul
+        # return ul
 
     def expand_ingredient_name(self,i):
         ii = [x.strip() for x in i.split('-',1)]
@@ -86,10 +92,12 @@ class Recipe(object):
         if a == '!':
             return None
         number, measure = a.split(' ', 1)
+
         try:
             number = int(number)
         except ValueError:
             number = float(number)
+
         expansion = self.expand_amount_measure(measure)
         if expansion is None:
             measure = measure
@@ -97,6 +105,7 @@ class Recipe(object):
             measure = expansion + 's'
         else:
             measure = expansion
+
         return "{n} {m}".format(n=number,m=measure)
 
     def expand_amount_measure(self,m):
@@ -109,8 +118,8 @@ class Recipe(object):
                 'p': ''
                 }.get(m,None)
 
-    def load(self,path):
-        return self.parse_yaml(self.read_file(path))
+    def load(self):
+        return self.parse_yaml(self.read_file(self.path))
 
     def read_file(self,path):
         try:
