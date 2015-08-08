@@ -39,6 +39,9 @@ def process_food(files):
 def handle_recipe(recipe_path):
     return Recipe(recipe_path).process()
 
+def copy_statics():
+    cp_r(os.path.join(i,'copy'), o)
+
 def process_site(recipes):
     env = Environment(
             loader=FileSystemLoader(os.path.join(i,'templates')),
@@ -52,7 +55,7 @@ def process_site(recipes):
             )
     for recipe in recipes:
         write_html(
-                index.render(recipe=recipe),
+                recipe.render(recipe=recipe),
                 "{}.html".format(recipe.name)
                 )
 
