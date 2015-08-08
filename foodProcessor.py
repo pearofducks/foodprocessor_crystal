@@ -7,17 +7,18 @@ import yaml
 import yamlordereddictloader
 import markdown
 from multiprocessing import Pool
+from distutils.dir_util import copy_tree as cp_r
 from jinja2 import Template
 from jinja2 import Environment, FileSystemLoader
 
 def handle_args():
+    global i,o
     parser = argparse.ArgumentParser(description='process a folder of recipes into a static site')
     parser.add_argument("input", help="the folder of (YAML) recipes to process")
     parser.add_argument("output", help="the destination folder for output")
     args = parser.parse_args()
-    src = fullpath(args.input)
-    dst = fullpath(args.output)
-    return src,dst
+    i = fullpath(args.input)
+    o = fullpath(args.output)
 
 def fullpath(path):
     return os.path.realpath(os.path.expanduser(path))
@@ -25,7 +26,7 @@ def fullpath(path):
 def check_destination(target):
     if not os.path.exists(target): os.makedirs(target)
 
-def gather(i):
+def gather():
     return glob.glob(os.path.join(i,'*.recipe'))
 
 def process_food(files):
@@ -38,14 +39,32 @@ def process_food(files):
 def handle_recipe(recipe_path):
     return Recipe(recipe_path).process()
 
+def process_site(recipes):
+    env = Environment(
+            loader=FileSystemLoader(os.path.join(i,'templates')),
+            trim_blocks=True
+            )
+    index = env.get_template('index.html')
+    recipe = env.get_template('recipe.html')
+    write_html(
+            index.render(recipes=recipes),
+            'index.html'
+            )
+    for recipe in recipes:
+        write_html(
+                index.render(recipe=recipe),
+                "{}.html".format(recipe.name)
+                )
+
+def write_html(html,dest):
+    with open(os.path.join(o,dest),'wb') as f:
+        f.write(html)
+
 def main():
-    i,o = handle_args()
-    print i
-    print o
-    print gather(i)
-    recipes = process_food(gather(i))
-    for rs in recipes:
-        print rs.name
+    handle_args()
+    check_destination(o)
+    recipes = process_food(gather())
+    process_site(recipes)
 
 class Recipe(object):
 
