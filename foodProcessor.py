@@ -46,6 +46,7 @@ def copy_statics():
     cp_r(os.path.join(i,'copy'), o)
 
 def process_site(recipes):
+    copy_statics()
     env = Environment(
             loader=FileSystemLoader(os.path.join(i,'templates')),
             trim_blocks=True
@@ -63,7 +64,7 @@ def process_site(recipes):
                 )
 
 def write_html(html,dest):
-    with codecs.open(os.path.join(o,dest),'w',encoding='utf8') as f:
+    with codecs.open(os.path.join(o,dest.replace(' ','_')),'w',encoding='utf8') as f:
         f.write(html)
 
 def main():
