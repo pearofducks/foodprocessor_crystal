@@ -2,3 +2,4 @@
 venv/
 recipes/
 .DS_Store
+out/

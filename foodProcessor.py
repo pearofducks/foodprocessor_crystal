@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import os
+import sys
 import glob
 import argparse
+import codecs
 import yaml
 import yamlordereddictloader
 import markdown
@@ -53,14 +56,14 @@ def process_site(recipes):
             index.render(recipes=recipes),
             'index.html'
             )
-    for recipe in recipes:
+    for r in recipes:
         write_html(
-                recipe.render(recipe=recipe),
-                "{}.html".format(recipe.name)
+                recipe.render(recipe=r),
+                "{}.html".format(r.name)
                 )
 
 def write_html(html,dest):
-    with open(os.path.join(o,dest),'wb') as f:
+    with codecs.open(os.path.join(o,dest),'w',encoding='utf8') as f:
         f.write(html)
 
 def main():
@@ -78,7 +81,7 @@ class Recipe(object):
     def process(self):
         yaml = self.load()
         self.name = yaml.pop('name')
-        self.process_dict(yaml,0)
+        self.process_dict(yaml,2)
         return self
 
     def process_dict(self,d,depth):
@@ -127,7 +130,11 @@ class Recipe(object):
         try:
             number = int(number)
         except ValueError:
-            number = float(number)
+            try:
+                number = float(number)
+            except ValueError,e:
+                print "Error processing {}, {}".format(self.path,e)
+                sys.exit(1)
         expansion = self.amount_measure(measure)
         if expansion is None:
             measure = measure
