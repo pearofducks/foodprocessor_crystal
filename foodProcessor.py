@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+import os
+import glob
+import argparse
 import yaml
 import yamlordereddictloader
 import markdown
+from multiprocessing import Pool
 from jinja2 import Template
 from jinja2 import Environment, FileSystemLoader
-
-src = ""
-dst = ""
 
 def handle_args():
     parser = argparse.ArgumentParser(description='process a folder of recipes into a static site')
@@ -17,6 +17,7 @@ def handle_args():
     args = parser.parse_args()
     src = fullpath(args.input)
     dst = fullpath(args.output)
+    return src,dst
 
 def fullpath(path):
     return os.path.realpath(os.path.expanduser(path))
@@ -24,8 +25,8 @@ def fullpath(path):
 def check_destination(target):
     if not os.path.exists(target): os.makedirs(target)
 
-def gather():
-    return [os.path.basename(f) for f in glob.glob(os.path.join(src,'*.recipe'))]
+def gather(i):
+    return glob.glob(os.path.join(i,'*.recipe'))
 
 def process_food(files):
     pool = Pool(3)
@@ -38,8 +39,13 @@ def handle_recipe(recipe_path):
     return Recipe(recipe_path).process()
 
 def main():
-    handle_args()
-    recipes = process_food(gather())
+    i,o = handle_args()
+    print i
+    print o
+    print gather(i)
+    recipes = process_food(gather(i))
+    for rs in recipes:
+        print rs.name
 
 class Recipe(object):
 
@@ -51,6 +57,7 @@ class Recipe(object):
         yaml = self.load()
         self.name = yaml.pop('name')
         self.process_dict(yaml,0)
+        return self
 
     def process_dict(self,d,depth):
         for k,v in d.items():
@@ -146,3 +153,7 @@ class Recipe(object):
             return yaml.load(text, Loader=yamlordereddictloader.Loader)
         except Exception,e:
             print "{error} when parsing YAML".format(error=e)
+
+
+if __name__ == '__main__':
+    main()
