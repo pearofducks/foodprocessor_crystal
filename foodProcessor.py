@@ -27,7 +27,7 @@ def check_destination(target):
 def gather():
     return [os.path.basename(f) for f in glob.glob(os.path.join(src,'*.recipe'))]
 
-def process_raw(files):
+def process_food(files):
     pool = Pool(3)
     recipes = pool.map(handle_recipe,files)
     pool.close()
@@ -35,11 +35,11 @@ def process_raw(files):
     return recipes
 
 def handle_recipe(recipe_path):
-    return recipe
+    return Recipe(recipe_path).process()
 
 def main():
     handle_args()
-    go()
+    recipes = process_food(gather())
 
 class Recipe(object):
 
@@ -51,25 +51,6 @@ class Recipe(object):
         yaml = self.load()
         self.name = yaml.pop('name')
         self.process_dict(yaml,0)
-        print
-        print "markdown"
-        print self.markdown()
-        print
-        print "html"
-        print self.html()
-
-    def markdown(self):
-        return "\n".join(self.mkdn)
-
-    def html(self):
-        return markdown.markdown(self.markdown())
-
-    def print_headers(self,h,k):
-        self.mkdn.append("{h}{k}".format(h="#"*h,k=k))
-
-    def add_space(self):
-        if not self.mkdn[-1] == "":
-            self.mkdn.append("")
 
     def process_dict(self,d,depth):
         for k,v in d.items():
@@ -109,7 +90,6 @@ class Recipe(object):
         else:
             return "**{main}**".format(main=i)
 
-
     def ingredient_amount(self,a):
         a = a.strip()
         if a == '!':
@@ -137,6 +117,19 @@ class Recipe(object):
                 'g': 'gram',
                 'p': ''
                 }.get(m,None)
+
+    def markdown(self):
+        return "\n".join(self.mkdn)
+
+    def html(self):
+        return markdown.markdown(self.markdown())
+
+    def print_headers(self,h,k):
+        self.mkdn.append("{h}{k}".format(h="#"*h,k=k))
+
+    def add_space(self):
+        if not self.mkdn[-1] == "":
+            self.mkdn.append("")
 
     def load(self):
         return self.parse_yaml(self.read_file(self.path))
