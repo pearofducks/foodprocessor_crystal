@@ -5,42 +5,44 @@ import pytest
 import foodProcessor as fp
 from foodProcessor import Recipe as R
 
-def test_read_basic_recipe():
-    r = R('test/simple.recipe')
-    yaml = r.load('test/simple.recipe')
+r = R('')
+r_simple = R('test/simple.recipe')
+r_complex = R('test/test.recipe')
+r_numerics = R('test/numeric_instructions.recipe')
+
+def test_read_recipe():
+    yaml = r_simple.load()
     assert yaml['name'] == 'apple pie'
     assert yaml['what'] == { 'flour': '2 c' }
     assert yaml['how']  == [ 'Preheat oven to 425°F / 220°C' ]
 
-def test_expand_amount_measure():
-    r = R('')
-    assert r.expand_amount_measure('ml') == 'milliliter'
-    assert r.expand_amount_measure('c') == 'cup'
-    assert r.expand_amount_measure('t') == 'teaspoon'
-    assert r.expand_amount_measure('T') == 'tablespoon'
-    assert r.expand_amount_measure('p') == ''
-    assert r.expand_amount_measure('foo') == None
+def test_amount_measure():
+    assert r.amount_measure('ml') == 'milliliter'
+    assert r.amount_measure('c') == 'cup'
+    assert r.amount_measure('t') == 'teaspoon'
+    assert r.amount_measure('T') == 'tablespoon'
+    assert r.amount_measure('p') == ''
+    assert r.amount_measure('foo') == None
 
-def test_expand_ingredient_amount():
-    r = R('')
-    assert r.expand_ingredient_amount('2 c') == '2 cups'
-    assert r.expand_ingredient_amount('0.5 t') == '0.5 teaspoon'
-    assert r.expand_ingredient_amount('2 pinches') == '2 pinches'
-    assert r.expand_ingredient_amount('!') == None
+def test_ingredient_amount():
+    assert r.ingredient_amount('2 c') == '2 cups'
+    assert r.ingredient_amount('0.5 t') == '0.5 teaspoon'
+    assert r.ingredient_amount('2 pinches') == '2 pinches'
+    assert r.ingredient_amount('!') == None
 
-def test_expand_ingredient_name():
-    r = R('')
-    assert r.expand_ingredient_name('flour - sifted') == '**flour** *sifted*'
-    assert r.expand_ingredient_name('sugar') == '**sugar**'
-    assert r.expand_ingredient_name('sugar - with - dashes') == '**sugar** *with - dashes*'
+def test_ingredient_name():
+    assert r.ingredient_name('flour - sifted') == '**flour** _sifted_'
+    assert r.ingredient_name('sugar') == '**sugar**'
+    assert r.ingredient_name('sugar - with - dashes') == '**sugar** _with - dashes_'
 
-# def test_process_ingredient():
-#     assert fp.process_ingredient('flour: 2 c'.split(':')) == '- 2 cups **flour**'
-#     assert fp.process_ingredient('sugar: !'.split(':')) == '- sugar'
-#     assert fp.process_ingredient('berries - halved: 1 g'.split(':')) == '- 1 gram **berries** *halved*'
-
-def test_process_ingredients():
-    r = R('')
-    test_data = {'flour - sifted': '2 c', 'sugar': '100 g'}
-    result_data = ['- 2 cups **flour** *sifted*', '- 100 grams **sugar**']
-    assert r.process_ingredient_batch(test_data) == result_data
+def test_process_ingredient():
+    r_proc_test = R('')
+    value_result_hash = {
+        'flour: 2 c': '- 2 cups **flour**',
+        'sugar: !': '- sugar',
+        'berries - halved: 1 g': '- 1 gram **berries** _halved_',
+        }
+    for value,result in value_result_hash.items():
+        k,v = value.split(':')
+        r_proc_test.process_ingredient(k,v)
+        assert result in r_proc_test.mkdn
