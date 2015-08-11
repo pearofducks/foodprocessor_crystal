@@ -9,19 +9,20 @@ import codecs
 import yaml
 import yamlordereddictloader
 import markdown
-from multiprocessing import Pool
 from distutils.dir_util import copy_tree as cp_r
 from jinja2 import Template
 from jinja2 import Environment, FileSystemLoader
 
 def handle_args():
-    global i,o
+    global i,o,m
     parser = argparse.ArgumentParser(description='process a folder of recipes into a static site')
     parser.add_argument("input", help="the folder of (YAML) recipes to process")
     parser.add_argument("output", help="the destination folder for output")
+    parser.add_argument("-m", "--markdown", help="increase output verbosity", action="store_true")
     args = parser.parse_args()
     i = fullpath(args.input)
     o = fullpath(args.output)
+    m = args.markdown
 
 def fullpath(path):
     return os.path.realpath(os.path.expanduser(path))
@@ -33,11 +34,7 @@ def gather():
     return glob.glob(os.path.join(i,'*.recipe'))
 
 def process_food(files):
-    pool = Pool(3)
-    recipes = pool.map(handle_recipe,files)
-    pool.close()
-    pool.join()
-    return recipes
+    return map(handle_recipe, files)
 
 def handle_recipe(recipe_path):
     return Recipe(recipe_path).process()
@@ -45,7 +42,7 @@ def handle_recipe(recipe_path):
 def copy_statics():
     cp_r(os.path.join(i,'copy'), o)
 
-def process_site(recipes):
+def process_html(recipes):
     copy_statics()
     env = Environment(
             loader=FileSystemLoader(os.path.join(i,'templates')),
@@ -53,25 +50,26 @@ def process_site(recipes):
             )
     index = env.get_template('index.html')
     recipe = env.get_template('recipe.html')
-    write_html(
-            index.render(recipes=recipes),
-            'index.html'
-            )
+    write_file( index.render(recipes=recipes), 'index.html')
     for r in recipes:
-        write_html(
-                recipe.render(recipe=r),
-                "{}.html".format(r.name)
-                )
+        write_file( recipe.render(recipe=r), "{}.html".format(r.name))
 
-def write_html(html,dest):
+def process_markdown(recipes):
+    for r in recipes:
+        write_file( r.markdown(), "{}.mkdn".format(r.name))
+
+def write_file(data,dest):
     with codecs.open(os.path.join(o,dest.replace(' ','_')),'w',encoding='utf8') as f:
-        f.write(html)
+        f.write(data)
 
 def main():
     handle_args()
     check_destination(o)
     recipes = process_food(gather())
-    process_site(recipes)
+    if m:
+        process_markdown(recipes)
+    else:
+        process_html(recipes)
 
 class Recipe(object):
 
