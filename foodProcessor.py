@@ -78,7 +78,10 @@ class Recipe(object):
         self.path = path
 
     def process(self):
-        yaml = self.load()
+        try:
+            yaml = self.load()
+        except Exception,e:
+            print "{error} when loading recipe {name}".format(error=e,name=path)
         self.name = yaml.pop('name')
         self.process_dict(yaml,2)
         return self
@@ -170,17 +173,11 @@ class Recipe(object):
         return self.parse_yaml(self.read_file(self.path))
 
     def read_file(self,path):
-        try:
-            with open(path) as f:
-                return f.read()
-        except Exception,e:
-            print "{error} when loading recipe {name}".format(error=e,name=path)
+        with open(path) as f:
+            return f.read()
 
     def parse_yaml(self,text):
-        try:
-            return yaml.load(text, Loader=yamlordereddictloader.Loader)
-        except Exception,e:
-            print "{error} when parsing YAML".format(error=e)
+        return yaml.load(text, Loader=yamlordereddictloader.Loader)
 
 
 if __name__ == '__main__':
