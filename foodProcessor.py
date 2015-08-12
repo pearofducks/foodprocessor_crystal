@@ -79,10 +79,7 @@ class Recipe(object):
 
     def process(self):
         yaml = self.load()
-        try:
-            self.name = yaml.pop('name')
-        except KeyError:
-            print "No 'name' field found in recipe at {}".format(self.path)
+        self.get_name()
         self.process_dict(yaml,2)
         return self
 
@@ -155,6 +152,12 @@ class Recipe(object):
                 'g': 'gram',
                 'p': ''
                 }.get(m,None)
+
+    def get_name(self):
+        try:
+            self.name = yaml.pop('name')
+        except KeyError:
+            print "No 'name' field found in recipe at {}".format(self.path)
 
     def markdown(self):
         return "\n".join(self.mkdn)
