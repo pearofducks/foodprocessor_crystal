@@ -34,7 +34,9 @@ def gather():
     return glob.glob(os.path.join(i,'*.recipe'))
 
 def process_food(files):
-    return list(map(handle_recipe, files))
+    l = list(map(handle_recipe, files))
+    l.sort(key=lambda x: x.name)
+    return l
 
 def handle_recipe(recipe_path):
     return Recipe(recipe_path).process()
