@@ -59,8 +59,11 @@ def process_markdown(recipes):
         write_file( r.markdown(), "{}.mkdn".format(r.name))
 
 def write_file(data,dest):
-    with codecs.open(os.path.join(o,dest.replace(' ','_')),'w',encoding='utf8') as f:
-        f.write(data)
+    try:
+        with codecs.open(os.path.join(o,dest.replace(' ','_')),'w',encoding='utf8') as f:
+            f.write(data)
+    except Exception,e:
+        print "Error writing a file out to {}.\nThe error was {}".format(dest,e)
 
 def main():
     handle_args()
