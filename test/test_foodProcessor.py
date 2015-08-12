@@ -20,15 +20,18 @@ def test_read_recipe():
 
 def test_file_dne():
     r_dne = R('test/does_not_exist')
-    yaml = r_dne.load()
+    with pytest.raises(SystemExit):
+        yaml = r_dne.load()
 
 def test_file_bad_data():
     r_bad = R('test/bad.recipe')
-    yaml = r_bad.load()
+    with pytest.raises(SystemExit):
+        yaml = r_bad.load()
 
 def test_file_bad_name():
     r_bad = R('test/bad_name.recipe')
-    result = r_bad.process()
+    with pytest.raises(SystemExit):
+        result = r_bad.process()
 
 def test_amount_measure():
     assert r.amount_measure('ml') == 'milliliter'
