@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
 import os
 import sys
 import glob
@@ -34,7 +34,7 @@ def gather():
     return glob.glob(os.path.join(i,'*.recipe'))
 
 def process_food(files):
-    return map(handle_recipe, files)
+    return list(map(handle_recipe, files))
 
 def handle_recipe(recipe_path):
     return Recipe(recipe_path).process()
@@ -62,8 +62,8 @@ def write_file(data,dest):
     try:
         with codecs.open(os.path.join(o,dest.replace(' ','_')),'w',encoding='utf8') as f:
             f.write(data)
-    except Exception,e:
-        print "Error writing a file out to {}.\nThe error was {}".format(dest,e)
+    except Exception as e:
+        print("Error writing a file out to {}.\nThe error was {}").format(dest,e)
 
 def main():
     handle_args()
@@ -134,8 +134,8 @@ class Recipe(object):
         except ValueError:
             try:
                 number = float(number)
-            except ValueError,e:
-                print "Error processing {}, {}".format(self.path,e)
+            except ValueError as e:
+                print("** Error processing some numbers found in {}\n{}").format(self.path,e)
                 sys.exit(1)
         expansion = self.amount_measure(measure)
         if expansion is None:
@@ -160,7 +160,7 @@ class Recipe(object):
         try:
             self.name = yaml.pop('name')
         except KeyError:
-            print "No 'name' field found in recipe at {}".format(self.path)
+            print("No 'name' field found in recipe at {}").format(self.path)
 
     def markdown(self):
         return "\n".join(self.mkdn)
@@ -183,14 +183,14 @@ class Recipe(object):
             with open(path) as f:
                 return f.read()
         except IOError as e:
-            print "** There was a problem when reading the file {name}\n\n{error}".format(error=e,name=self.path)
+            print("** There was a problem when reading the file {name}\n\n{error}").format(error=e,name=self.path)
             sys.exit(1)
 
     def parse_yaml(self,text):
         try:
             return yaml.load(text, Loader=yamlordereddictloader.Loader)
         except Exception as e:
-            print "** There was a problem when loading YAML from recipe {name}\n\n{error}".format(error=e,name=self.path)
+            print("** There was a problem when loading YAML from recipe {name}\n\n{error}").format(error=e,name=self.path)
             sys.exit(1)
 
 
