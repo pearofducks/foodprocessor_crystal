@@ -183,13 +183,15 @@ class Recipe(object):
             with open(path) as f:
                 return f.read()
         except IOError as e:
-            print "{error} when loading recipe {name}".format(error=e,name=self.path)
+            print "** There was a problem when reading the file {name}\n\n{error}".format(error=e,name=self.path)
+            sys.exit(1)
 
     def parse_yaml(self,text):
         try:
             return yaml.load(text, Loader=yamlordereddictloader.Loader)
         except Exception as e:
-            print "{error} when loading YAML from recipe {name}".format(error=e,name=self.path)
+            print "** There was a problem when loading YAML from recipe {name}\n\n{error}".format(error=e,name=self.path)
+            sys.exit(1)
 
 
 if __name__ == '__main__':
