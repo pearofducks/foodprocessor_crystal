@@ -82,7 +82,7 @@ class Recipe(object):
 
     def process(self):
         yaml = self.load()
-        self.get_name()
+        self.get_name(yaml)
         self.process_dict(yaml,2)
         return self
 
@@ -156,7 +156,7 @@ class Recipe(object):
                 'p': ''
                 }.get(m,None)
 
-    def get_name(self):
+    def get_name(self,yaml):
         try:
             self.name = yaml.pop('name')
         except KeyError:
