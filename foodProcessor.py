@@ -48,11 +48,11 @@ def process_html(recipes):
             loader=FileSystemLoader(os.path.join(i,'templates')),
             trim_blocks=True
             )
-    index = env.get_template('index.html')
-    recipe = env.get_template('recipe.html')
-    write_file( index.render(recipes=recipes), 'index.html')
+    index_template = env.get_template('index.html')
+    recipe_template = env.get_template('recipe.html')
+    write_file( index_template.render(recipes=recipes), 'index.html')
     for r in recipes:
-        write_file( recipe.render(recipe=r), "{}.html".format(r.name))
+        write_file( recipe_template.render(recipe=r), "{}.html".format(r.name))
 
 def process_markdown(recipes):
     for r in recipes:
