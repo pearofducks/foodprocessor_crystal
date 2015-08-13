@@ -184,16 +184,18 @@ class Recipe(object):
     def read_file(self,path):
         try:
             with open(path) as f:
-                return f.read()
+                return f.read().decode('utf-8')
         except IOError as e:
-            print("** There was a problem when reading the file {name}\n\n{error}".format(error=e,name=self.path))
+            print("** Error when reading in recipe at {}".format(self.path))
+            print(e)
             sys.exit(1)
 
     def parse_yaml(self,text):
         try:
             return yaml.load(text, Loader=yamlordereddictloader.Loader)
         except Exception as e:
-            print("** There was a problem when loading YAML from recipe {name}\n\n{error}".format(error=e,name=self.path))
+            print("** Error when processing YAML for recipe at {}".format(self.path))
+            print(e)
             sys.exit(1)
 
 
