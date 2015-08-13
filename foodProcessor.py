@@ -90,7 +90,7 @@ class Recipe(object):
 
     def process_dict(self,d,depth):
         for k,v in d.items():
-            if isinstance(v, str):
+            if isinstance(v, str) or v is None:
                 self.process_ingredient(k,v)
             elif isinstance(v, dict):
                 self.print_headers(depth+1,k)
@@ -127,8 +127,8 @@ class Recipe(object):
             return "**{main}**".format(main=i)
 
     def ingredient_amount(self,a):
-        a = a.strip()
-        if a == '!':
+        if a is not None: a = a.strip()
+        if a == '!' or a is None:
             return None
         number, measure = a.split(' ', 1)
         try:
