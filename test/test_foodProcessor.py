@@ -46,6 +46,7 @@ def test_ingredient_amount():
     assert r.ingredient_amount('0.5 t') == '0.5 teaspoon'
     assert r.ingredient_amount('2 pinches') == '2 pinches'
     assert r.ingredient_amount('!') == None
+    assert r.ingredient_amount(None) == None
 
 def test_ingredient_name():
     assert r.ingredient_name('flour - sifted') == '**flour** _sifted_'

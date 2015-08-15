@@ -109,7 +109,7 @@ class Recipe(object):
 
     def process_ingredient(self,k,v):
         amount = self.ingredient_amount(v)
-        if amount is not None:
+        if amount:
             self.mkdn.append("- {amt} {ingredient}".format(
                 amt=amount,
                 ingredient=self.ingredient_name(k)
@@ -127,7 +127,7 @@ class Recipe(object):
             return "**{main}**".format(main=i)
 
     def ingredient_amount(self,a):
-        if a is not None: a = a.strip()
+        if a: a = a.strip()
         if a == '!' or a is None:
             return None
         number, measure = a.split(' ', 1)
