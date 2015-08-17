@@ -155,7 +155,9 @@ class Recipe(object):
                 print("** Error processing some numbers found in {}\n{}".format(self.path,e))
                 sys.exit(1)
         expansion = self.amount_measure(measure)
-        if expansion is None:
+        if expansion is False:
+            return "{n}".format(n=number)
+        elif expansion is None:
             measure = measure
         elif number > 1:
             measure = expansion + 's'
@@ -171,7 +173,7 @@ class Recipe(object):
                 'T': 'tablespoon',
                 'ml': 'milliliter',
                 'g': 'gram',
-                'p': None
+                'p': False
                 }.get(m,None)
 
     def get_name(self,yaml):
