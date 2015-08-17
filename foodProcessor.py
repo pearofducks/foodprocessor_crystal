@@ -83,12 +83,16 @@ class Recipe(object):
         self.path = path
 
     def process(self):
+        # Loads YAML (and file), then kicks off YAML processing loop/recursion
         yaml = self.load()
         self.get_name(yaml)
         self.process_dict(yaml,2)
         return self
 
     def process_dict(self,d,depth):
+        ''' Main YAML processing loop, since recipes come in as an ordered dict
+            - depth is used for setting headers in output (depth+1)
+        '''
         for k,v in d.items():
             if isinstance(v, str) or v is None:
                 self.process_ingredient(k,v)
@@ -103,11 +107,20 @@ class Recipe(object):
                 self.process_list(v)
 
     def process_list(self,l):
+        # Processing for lists, each list item is handled as raw Markdown
         for line in l:
             self.mkdn.append(line)
             self.add_space()
 
     def process_ingredient(self,k,v):
+        ''' Used for individual ingredient lines
+            - k is the ingredient name (item)
+            - v is the measurement (measure)
+            one of three conditions could occur:
+                - a) item: !             -> item is processed as raw Markdown
+                - b) item: measure       -> item is bolded, and measure is expanded (if possible)
+                - c) item - adj: measure -> item is bolded, adj is italicized, and measure is expanded (if possible)
+        '''
         amount = self.ingredient_amount(v)
         if amount:
             self.mkdn.append("- {amt} {ingredient}".format(
@@ -120,6 +133,7 @@ class Recipe(object):
                 ))
 
     def ingredient_name(self,i):
+        # Handles case C under process_ingredient
         ii = [x.strip() for x in i.split('-',1)]
         if len(ii) == 2:
             return "**{main}** _{adj}_".format(main=ii[0], adj=ii[1])
@@ -127,6 +141,7 @@ class Recipe(object):
             return "**{main}**".format(main=i)
 
     def ingredient_amount(self,a):
+        # Expands measurements to full words from abbreviations (c -> cups)
         if a: a = a.strip()
         if a == '!' or a is None:
             return None
@@ -149,6 +164,7 @@ class Recipe(object):
         return "{n} {m}".format(n=number,m=measure)
 
     def amount_measure(self,m):
+        # Essentially a case/switch for expansions
         return {
                 'c': 'cup',
                 't': 'teaspoon',
