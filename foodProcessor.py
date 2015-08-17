@@ -134,7 +134,7 @@ class Recipe(object):
 
     def ingredient_name(self,i):
         # Handles case C under process_ingredient
-        ii = [x.strip() for x in i.split('-',1)]
+        ii = [x.strip() for x in i.split(' - ',1)]
         if len(ii) == 2:
             return "**{main}** _{adj}_".format(main=ii[0], adj=ii[1])
         else:
