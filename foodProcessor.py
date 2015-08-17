@@ -171,7 +171,7 @@ class Recipe(object):
                 'T': 'tablespoon',
                 'ml': 'milliliter',
                 'g': 'gram',
-                'p': ''
+                'p': None
                 }.get(m,None)
 
     def get_name(self,yaml):
