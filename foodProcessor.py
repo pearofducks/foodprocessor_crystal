@@ -42,7 +42,10 @@ def handle_recipe(recipe_path):
     return Recipe(recipe_path).process()
 
 def copy_statics():
-    cp_r(os.path.join(i,'copy'), o)
+    try:
+        cp_r(os.path.join(i,'copy'), o)
+    except:
+        print("No 'copy' dir found in source, ignoring...")
 
 def process_html(recipes):
     copy_statics()
