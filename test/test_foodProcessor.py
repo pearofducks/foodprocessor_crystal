@@ -38,7 +38,7 @@ def test_amount_measure():
     assert r.amount_measure('c') == 'cup'
     assert r.amount_measure('t') == 'teaspoon'
     assert r.amount_measure('T') == 'tablespoon'
-    assert r.amount_measure('p') == ''
+    assert r.amount_measure('p') == False
     assert r.amount_measure('foo') == None
 
 def test_ingredient_amount():
