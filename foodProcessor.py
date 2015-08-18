@@ -14,15 +14,17 @@ from jinja2 import Template
 from jinja2 import Environment, FileSystemLoader
 
 def handle_args():
-    global i,o,m
+    global i,o,m,a
     parser = argparse.ArgumentParser(description='process a folder of recipes into a static site')
     parser.add_argument("input", help="the folder of (YAML) recipes to process")
     parser.add_argument("output", help="the destination folder for output")
     parser.add_argument("-m", "--markdown", help="increase output verbosity", action="store_true")
+    parser.add_argument("-a", "--all", help="increase output verbosity", action="store_true")
     args = parser.parse_args()
     i = fullpath(args.input)
     o = fullpath(args.output)
     m = args.markdown
+    a = args.all
 
 def fullpath(path):
     return os.path.realpath(os.path.expanduser(path))
@@ -74,9 +76,9 @@ def main():
     handle_args()
     check_destination(o)
     recipes = process_food(gather())
-    if m:
+    if m or a:
         process_markdown(recipes)
-    else:
+    elif a or not m:
         process_html(recipes)
 
 class Recipe(object):
