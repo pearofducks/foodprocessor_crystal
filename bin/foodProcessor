@@ -6,7 +6,7 @@ basepath=$(dirname $(realpath $0))
 fp_path=${basepath%bin}
 venv_path=${fp_path}venv/bin/
 
-if [[ ! -e $venv_path ]]; then
+if [ ! -e $venv_path ]; then
   echo "No venv directory found, installing required modules...\n\n"
   cd $fp_path
   virtualenv venv
@@ -15,4 +15,4 @@ if [[ ! -e $venv_path ]]; then
 fi
 
 
-${venv_path}python ${fp_path}foodProcessor.py
+${venv_path}python ${fp_path}foodProcessor.py $@
