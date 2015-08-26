@@ -207,7 +207,7 @@ class Recipe(object):
     def read_file(self,path):
         try:
             with open(path) as f:
-                return f.read().decode('utf-8')
+                return f.read()
         except IOError as e:
             print("** Error when reading in recipe at {}".format(self.path))
             print(e)
