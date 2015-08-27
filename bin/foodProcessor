@@ -15,4 +15,4 @@ if [ ! -e $venv_path ]; then
 fi
 
 
-${venv_path}python ${fp_path}foodProcessor.py $@
+${venv_path}python3 ${fp_path}foodProcessor.py $@
