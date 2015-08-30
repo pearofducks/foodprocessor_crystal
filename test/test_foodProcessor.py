@@ -18,6 +18,11 @@ def test_read_recipe():
     assert yaml['what'] == { 'flour': '2 c' }
     assert yaml['how']  == [ 'Preheat oven to 425°F / 220°C' ]
 
+def test_process_basic_recipe():
+    recipe = r_simple.process()
+    assert recipe.name == 'apple pie'
+    assert recipe.filename() == 'apple_pie'
+
 def test_file_dne():
     r_dne = R('test/does_not_exist')
     with pytest.raises(SystemExit):

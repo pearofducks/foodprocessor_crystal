@@ -67,7 +67,7 @@ def process_markdown(recipes):
 
 def write_file(data,dest):
     try:
-        with codecs.open(os.path.join(o,dest.replace(' ','_')),'w',encoding='utf8') as f:
+        with codecs.open(os.path.join(o,dest),'w',encoding='utf8') as f:
             f.write(data)
     except Exception as e:
         print("Error writing a file out to {}.\nThe error was {}".format(dest,e))
@@ -207,6 +207,9 @@ class Recipe(object):
     def cleanup(self):
         if self.mkdn[0] == "":
             self.mkdn.pop(0) # clean up our whitespace at the top
+
+    def filename(self):
+        return self.name.replace(' ','_')
 
     def load(self):
         return self.parse_yaml(self.read_file(self.path))
