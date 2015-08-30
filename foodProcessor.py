@@ -85,6 +85,7 @@ class Recipe(object):
 
     def __init__(self,path):
         self.mkdn = []
+        self.mkdn.append("") # avoid out-of-bounds errors because we call the last index later
         self.path = path
 
     def process(self):
@@ -92,27 +93,27 @@ class Recipe(object):
         yaml = self.load()
         self.get_name(yaml)
         self.process_dict(yaml,2)
+        self.cleanup
         return self
 
     def process_dict(self,d,depth):
         ''' Main YAML processing loop, since recipes come in as an ordered dict
             - depth is used for setting headers in output (depth+1)
         '''
+        self.add_space()
         for k,v in d.items():
             if isinstance(v, str) or v is None:
                 self.process_ingredient(k,v)
             elif isinstance(v, dict):
                 self.print_headers(depth+1,k)
-                self.add_space()
                 self.process_dict(v,depth+1)
-                self.add_space()
             elif isinstance(v, list):
                 self.print_headers(depth+1,k)
-                self.add_space()
                 self.process_list(v)
 
     def process_list(self,l):
         # Processing for lists, each list item is handled as raw Markdown
+        self.add_space()
         for line in l:
             self.mkdn.append(line)
             self.add_space()
@@ -195,11 +196,17 @@ class Recipe(object):
         return markdown.markdown(self.markdown())
 
     def print_headers(self,h,k):
+        self.add_space()
         self.mkdn.append("{h}{k}".format(h="#"*h,k=k))
+        self.add_space()
 
     def add_space(self):
         if not self.mkdn[-1] == "":
             self.mkdn.append("")
+
+    def cleanup(self):
+        if self.mkdn[0] == "":
+            self.mkdn.pop(0) # clean up our whitespace at the top
 
     def load(self):
         return self.parse_yaml(self.read_file(self.path))
