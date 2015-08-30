@@ -12,6 +12,7 @@ import markdown
 from distutils.dir_util import copy_tree as cp_r
 from jinja2 import Template
 from jinja2 import Environment, FileSystemLoader
+from slugify import slugify
 
 def handle_args():
     global i,o,m,a
