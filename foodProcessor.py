@@ -209,7 +209,7 @@ class Recipe(object):
             self.mkdn.pop(0) # clean up our whitespace at the top
 
     def filename(self):
-        return self.name.replace(' ','_')
+        return slugify(self.name, separator='_', max_length=20)
 
     def load(self):
         return self.parse_yaml(self.read_file(self.path))
