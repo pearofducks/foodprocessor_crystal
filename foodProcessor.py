@@ -60,7 +60,7 @@ def process_html(recipes):
     recipe_template = env.get_template('recipe.html')
     write_file( index_template.render(recipes=recipes), 'index.html')
     for r in recipes:
-        write_file( recipe_template.render(recipe=r), "{}.html".format(r.name))
+        write_file( recipe_template.render(recipe=r), "{}.html".format(r.filename()))
 
 def process_markdown(recipes):
     for r in recipes:
