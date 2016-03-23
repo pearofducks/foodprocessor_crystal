@@ -4,3 +4,4 @@ recipes/
 .DS_Store
 out/
 __pycache__/
+.crystal
