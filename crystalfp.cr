@@ -1,14 +1,20 @@
 require "yaml"
 require "markdown"
 
-# channel = Channel(Recipe).new
-# recipes = [] of Recipe
-# files.each do |f|
-#   spawn {
-#     channel.send Recipe.new(f)
-#   }
-#   recipes << channel.receive
-# end
+def go(input : String, output : String)
+  files = Dir.glob File.join(input,"*.recipe")
+  channel = Channel(Recipe).new
+  recipes = [] of Recipe
+  files.each do |f|
+    spawn {
+      channel.send Recipe.new(f)
+    }
+    recipes << channel.receive
+  end
+  recipes.each do |r|
+    puts r.name
+  end
+end
 
 class Recipe
   def initialize(recipe_file)
@@ -89,6 +95,10 @@ class Recipe
   def markdown
     @markdown.join "\n"
   end
+  def name
+    @name
+  end
 end
 
-puts Recipe.new("./t.recipe").html
+# puts Recipe.new("./t.recipe").name
+go("../recipes",".")
