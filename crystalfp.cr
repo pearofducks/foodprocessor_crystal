@@ -1,10 +1,20 @@
 require "yaml"
 require "markdown"
 
+# channel = Channel(Recipe).new
+# recipes = [] of Recipe
+# files.each do |f|
+#   spawn {
+#     channel.send Recipe.new(f)
+#   }
+#   recipes << channel.receive
+# end
+
 class Recipe
   def initialize(recipe_file)
     @markdown = [] of String
     @markdown << ""
+
     h = YAML.parse(File.read(recipe_file)).as_h
     @name = h.delete "name"
     process(h,2)
@@ -36,17 +46,29 @@ class Recipe
   def process_ingredient(k : String, v : String)
     name = ingredient_name k
     measure = ingredient_measure v
-    add "- #{measure} #{name}"
+    add "- #{measure + name}"
   end
-  def ingredient_name(name : String)
+  def ingredient_name(name : String) : String
     z = name.split " - "
     if z.size == 1
-      z.first
+      "**#{z.first}**"
     else
-      "#{z.first} - *#{z.last}*"
+      "**#{z.first}** - *#{z.last}*"
     end
   end
-  def ingredient_measure(measure)
+  def ingredient_measure(measure) : String
+    z = measure.split " "
+    if measure.size == 1 || measure == "!"
+      ""
+    else
+      if z.first.to_f > 1
+        "#{z.first} #{expand_measure(z.last) + 's'} "
+      else
+        "#{z.first} #{expand_measure(z.last)} "
+      end
+    end
+  end
+  def expand_measure(measure)
     case measure
     when "c"
       "cup"
@@ -58,6 +80,8 @@ class Recipe
       "milliliter"
     when "g"
       "gram"
+    else
+      measure
     end
   end
   def process_instructions(a : Array)
