@@ -1,19 +1,29 @@
 require "yaml"
 require "markdown"
+require "ecr/macros"
 
-def go(input : String, output : String)
-  files = Dir.glob File.join(input,"*.recipe")
-  channel = Channel(Recipe).new
-  recipes = [] of Recipe
-  files.each do |f|
-    spawn {
-      channel.send Recipe.new(f)
-    }
-    recipes << channel.receive
+class FoodProcessor
+  def self.go(input : String, output : String)
+    files = Dir.glob File.join(input,"*.recipe")
+    channel = Channel(Recipe).new
+    recipes = [] of Recipe
+    files.each do |f|
+      spawn {
+        channel.send Recipe.new(f)
+      }
+      recipes << channel.receive
+    end
+    puts FPIndex.new(recipes).to_s
+    # recipes.each do |r|
+    # end
   end
-  recipes.each do |r|
-    puts r.name
+end
+
+class FPIndex
+  def initialize(@recipes)
   end
+
+  ECR.def_to_s "index.ecr"
 end
 
 class Recipe
@@ -22,7 +32,7 @@ class Recipe
     @markdown << ""
 
     h = YAML.parse(File.read(recipe_file)).as_h
-    @name = h.delete "name"
+    @name = h.delete("name") as String
     process(h,2)
   end
   def add(e)
@@ -79,6 +89,7 @@ class Recipe
     when "T"; "tablespoon"
     when "ml"; "milliliter"
     when "g"; "gram"
+    when "p"; ""
     else; measure
     end
   end
@@ -92,6 +103,9 @@ class Recipe
   def html
     Markdown.to_html @markdown.join("\n")
   end
+  def filename
+    @name.downcase.strip.gsub(' ', '_').gsub(/[^\w-]/, "")
+  end
   def markdown
     @markdown.join "\n"
   end
@@ -100,5 +114,4 @@ class Recipe
   end
 end
 
-# puts Recipe.new("./t.recipe").name
-go("../recipes",".")
+FoodProcessor.go("../recipes",".")

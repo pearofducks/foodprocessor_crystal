@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'/>
+    <meta content='David Honneffer' name='author'/>
+    <meta content='honneffer recipe food' name='keywords'/>
+    <title>h|f - recipes</title>
+    <link href='/main.css' rel='stylesheet' type='text/css'/>
+    <link href='//cloud.typography.com/7324432/749044/css/fonts.css' rel='stylesheet' type='text/css'/>
+  </head>
+  <body>
+    <div class='container'>
+      <h1 class='index'>honneffer | food</h1>
+      <div class='recipe'>
+        <ul>
+          <% @recipes.each do |r| %>
+            <li>
+              <h2>
+              <a href='<%= "#{r.filename}.html" %>'><%= r.name %></a>
+              </h2>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
