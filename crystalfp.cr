@@ -3,8 +3,13 @@ require "markdown"
 require "ecr/macros"
 
 class FoodProcessor
-  def self.go(input : String, output : String)
-    files = Dir.glob File.join(input,"*.recipe")
+  def self.go(input, output)
+    recipes = read(input)
+    write(recipes,output)
+    copy(input,output)
+  end
+  def self.read(input)
+    files = Dir.glob(File.join(input,"*.recipe"))
     channel = Channel(Recipe).new
     recipes = [] of Recipe
     files.each do |f|
@@ -13,16 +18,32 @@ class FoodProcessor
       }
       recipes << channel.receive
     end
-    puts FPIndex.new(recipes).to_s
-    # recipes.each do |r|
-    # end
+    recipes
+  end
+  def self.write(recipes,output)
+    File.write(
+      File.join(output,"index.html"),
+      IndexTemplate.new(recipes).to_s
+    )
+    recipes.each do |r|
+      File.write(
+        File.join(output,"#{r.filename}.html"),
+        RecipeTemplate.new(r).to_s
+      )
+    end
+  end
+  def self.copy(input,output)
+    `cp #{input}/copy/* #{output}`
   end
 end
 
-class FPIndex
-  def initialize(@recipes)
-  end
+class RecipeTemplate
+  def initialize(@recipe); end
+  ECR.def_to_s "recipe.ecr"
+end
 
+class IndexTemplate
+  def initialize(@recipes); end
   ECR.def_to_s "index.ecr"
 end
 
@@ -79,7 +100,11 @@ class Recipe
     else
       m_amount = z.first.to_f
       m_type = z.last
-      "#{m_amount} #{expand_measure(m_type) + (m_amount > 1 ? "s " : " ")}"
+      begin
+        "#{m_amount} #{expand_measure(m_type) + (m_amount > 1 ? 's' : ' ')} "
+      rescue # TODO: custom exception class
+        "#{m_amount} #{m_type} "
+      end
     end
   end
   def expand_measure(measure)
@@ -89,8 +114,7 @@ class Recipe
     when "T"; "tablespoon"
     when "ml"; "milliliter"
     when "g"; "gram"
-    when "p"; ""
-    else; measure
+    else; raise "No expansion"
     end
   end
   def process_instructions(a : Array)
@@ -114,4 +138,4 @@ class Recipe
   end
 end
 
-FoodProcessor.go("../recipes",".")
+FoodProcessor.go("../recipes","./out")

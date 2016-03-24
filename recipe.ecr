@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'/>
+    <meta content='David Honneffer' name='author'/>
+    <meta content='honneffer recipe food' name='keywords'/>
+    <title>h|f - <%= @recipe.name %></title>
+    <link href='/main.css' rel='stylesheet' type='text/css'/>
+    <link href='//cloud.typography.com/7324432/749044/css/fonts.css' rel='stylesheet' type='text/css'/>
+  </head>
+  <body>
+    <div class='container'>
+      <h1>
+        <a href='/'>honneffer | food</a>
+      </h1>
+      <div class='recipe'>
+        <h2 class='recipe-name'><%= @recipe.name %></h2>
+        <%= @recipe.html %>
+      </div>
+    </div>
+    <script src="zepto.js.min"></script>
+    <script>
+      $('li, p').on('click', function(){ $(this).toggleClass('dim'); return false; });
+    </script>
+  </body>
+</html>
