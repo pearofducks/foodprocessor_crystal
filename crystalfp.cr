@@ -4,35 +4,42 @@ require "markdown"
 class Recipe
   def initialize(recipe_file)
     @markdown = [] of String
+    @markdown << ""
     h = YAML.parse(File.read(recipe_file)).as_h
     @name = h.delete "name"
-    puts @name
     process(h,2)
   end
-  def header(s,d)
-    @markdown << "#{"#"*d}#{s}"
+  def add(e)
+    @markdown << e.chomp "\n"
   end
-  def process(h,d)
+  def header(s,d)
+    padding
+    add "#{"#"*d} #{s}"
+    padding
+  end
+  def padding()
+    add "" unless @markdown.last == ""
+  end
+  def process(h : Hash, d : Int)
     h.each do |k,v|
-      # we need to check both k and v, otherwise methods in
-      # process_ingredients complain
-      if v.is_a?(String)
-        process_ingredient(k as String,v)
-      elsif v.is_a?(Hash)
-        header(k,d)
-        process(v,d+1)
-      elsif v.is_a?(Array)
-        header(k,d)
-        process_instructions(v)
+      if v.is_a? String && k.is_a? String
+        process_ingredient k,v
+      elsif v.is_a? Hash
+        header k,d
+        process v,d+1
+      elsif v.is_a? Array
+        header k,d
+        process_instructions v
       end
     end
   end
-  def process_ingredient(k,v)
-    name = ingredient_name(k)
-    measure = ingredient_measure(v)
+  def process_ingredient(k : String, v : String)
+    name = ingredient_name k
+    measure = ingredient_measure v
+    add "- #{measure} #{name}"
   end
-  def ingredient_name(name)
-    z = name.split(" - ")
+  def ingredient_name(name : String)
+    z = name.split " - "
     if z.size == 1
       z.first
     else
@@ -40,21 +47,32 @@ class Recipe
     end
   end
   def ingredient_measure(measure)
-                # 'c': 'cup',
-                # 't': 'teaspoon',
-                # 'T': 'tablespoon',
-                # 'ml': 'milliliter',
-                # 'g': 'gram',
-                # 'p': False
+    case measure
+    when "c"
+      "cup"
+    when "t"
+      "teaspoon"
+    when "T"
+      "tablespoon"
+    when "ml"
+      "milliliter"
+    when "g"
+      "gram"
+    end
   end
-  def process_instructions(a)
+  def process_instructions(a : Array)
+    padding
     a.each do |v|
-      puts v
+      add v as String
+      padding
     end
   end
   def html
-    Markdown.to_html(@markdown)
+    Markdown.to_html @markdown.join("\n")
+  end
+  def markdown
+    @markdown.join "\n"
   end
 end
 
-puts Recipe.new("./t.recipe").html
+puts Recipe.new("./t.recipe").markdown
