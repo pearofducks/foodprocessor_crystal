@@ -53,35 +53,27 @@ class Recipe
     if z.size == 1
       "**#{z.first}**"
     else
-      "**#{z.first}** - *#{z.last}*"
+      "**#{z.first}** *#{z.last}*"
     end
   end
   def ingredient_measure(measure) : String
     z = measure.split " "
-    if measure.size == 1 || measure == "!"
+    if z.size == 1 || measure == "!"
       ""
     else
-      if z.first.to_f > 1
-        "#{z.first} #{expand_measure(z.last) + 's'} "
-      else
-        "#{z.first} #{expand_measure(z.last)} "
-      end
+      m_amount = z.first.to_f
+      m_type = z.last
+      "#{m_amount} #{expand_measure(m_type) + (m_amount > 1 ? "s " : " ")}"
     end
   end
   def expand_measure(measure)
     case measure
-    when "c"
-      "cup"
-    when "t"
-      "teaspoon"
-    when "T"
-      "tablespoon"
-    when "ml"
-      "milliliter"
-    when "g"
-      "gram"
-    else
-      measure
+    when "c"; "cup"
+    when "t"; "teaspoon"
+    when "T"; "tablespoon"
+    when "ml"; "milliliter"
+    when "g"; "gram"
+    else; measure
     end
   end
   def process_instructions(a : Array)
@@ -99,4 +91,4 @@ class Recipe
   end
 end
 
-puts Recipe.new("./t.recipe").markdown
+puts Recipe.new("./t.recipe").html
