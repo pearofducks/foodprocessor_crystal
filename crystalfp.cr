@@ -107,7 +107,7 @@ class Recipe
       end
     end
   end
-  def expand_measure(measure)
+  def expand_measure(measure) : String
     case measure
     when "c"; "cup"
     when "t"; "teaspoon"
@@ -138,4 +138,4 @@ class Recipe
   end
 end
 
-FoodProcessor.go("../recipes","./out")
+FoodProcessor.go(ARGV[0],ARGV[1])
