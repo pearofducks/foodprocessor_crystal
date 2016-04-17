@@ -1,6 +1,0 @@
-pyyaml
-Jinja2
-markdown
-pytest
-yamlordereddictloader
-awesome-slugify
